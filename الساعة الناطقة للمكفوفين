@@ -1,0 +1,48 @@
+import datetime
+from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
+from gtts import gTTS
+import os
+
+# ملاحظة: في التطبيقات الحقيقية للجوال، نستخدم مكتبات النظام للتعرف على الصوت
+# هنا سنقوم ببرمجة زر "كبير" يضغط عليه المكفوف في أي مكان لسماع الوقت
+
+class TalkingClock(App):
+    def build(self):
+        layout = BoxLayout()
+        
+        # إنشاء زر يملأ الشاشة ليسهل على المكفوف لمسه
+        btn = Button(
+            text='اضغط في أي مكان لسماع الوقت',
+            font_size=32,
+            background_color=(0, 0.5, 0.8, 1)
+        )
+        
+        # ربط الضغط على الزر بوظيفة نطق الوقت
+        btn.bind(on_press=self.tell_time)
+        
+        layout.add_widget(btn)
+        return layout
+
+    def tell_time(self, instance):
+        # 1. الحصول على الوقت الحالي
+        now = datetime.datetime.now()
+        current_time = now.strftime("%I:%M %p") # تنسيق: ساعة:دقيقة صباحاً/مساءً
+        
+        text_to_say = f"الوقت الآن هو {current_time}"
+        
+        # 2. تحويل النص إلى صوت باستخدام gTTS
+        tts = gTTS(text=text_to_say, lang='ar')
+        tts.save("time.mp3")
+        
+        # 3. تشغيل ملف الصوت
+        # ملاحظة: في الأندرويد نستخدم plyer للتشغيل، هنا نستخدم نظام التشغيل
+        if os.name == 'nt': # لويندوز
+            os.system("start time.mp3")
+        else: # للأنظمة الأخرى
+            os.system("mpg123 time.mp3")
+
+if __name__ == '__main__':
+    TalkingClock().run()
+
